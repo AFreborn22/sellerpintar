@@ -1,4 +1,4 @@
-# Node.js Express Prisma App
+# Test Backend sellerpintar Node.js Express Prisma App
 
 This project is a Node.js application built with Express.js and Prisma ORM, designed to manage user, merchant, and product data. It follows the MVC architecture and includes separate folders for controllers, services, and routes.
 
@@ -62,13 +62,6 @@ npm start
 ```
 
 The server will start on `http://localhost:3000`.
-
-### API Documentation
-
-The API endpoints are documented using Swagger. You can access the documentation at:
-
-```
-http://localhost:3000/api-docs
 ```
 
 ## Folder Structure
