@@ -1,12 +1,12 @@
 const prisma = require('../generated/prisma');
 
 exports.addVariation = async (data) => {
-  const { color, size, productId, stocks } = data;
+  const { color, size, id, stocks } = data;
   const variation = await prisma.variation.create({
     data: {
       color,
       size,
-      productId,
+      id,
       stock_count: {
         create: stocks.map((stock) => ({
           quantity: stock.quantity,
@@ -19,8 +19,8 @@ exports.addVariation = async (data) => {
   return variation;
 };
 
-exports.getVariationsByProductId = async (productId) => {
+exports.getVariationsByProductId = async (id) => {
   return await prisma.variation.findMany({
-    where: { productId },
+    where: { id },
   });
 };

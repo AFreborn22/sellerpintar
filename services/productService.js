@@ -1,11 +1,11 @@
 const prisma = require('../generated/prisma');
 
 exports.addProduct = async (data) => {
-  const { name, merchantId, variations } = data;
+  const { name, id, variations } = data;
   const product = await prisma.product.create({
     data: {
       name,
-      merchantId,
+      id,
       variations: {
         create: variations.map((variation) => ({
           color: variation.color,

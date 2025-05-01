@@ -1,11 +1,10 @@
 const prisma = require('../generated/prisma');
 
 exports.registerMerchant = async (data) => {
-  const { name, userId } = data;
+  const { name } = data;
   const merchant = await prisma.merchant.create({
     data: {
       name,
-      userId,
     },
   });
   return merchant;
@@ -29,7 +28,9 @@ exports.updateMerchant = async (id, data) => {
 
   const updatedMerchant = await prisma.merchant.update({
     where: { id: id },
-    data,
+    data : {
+      name : data.name,
+    },
   });
 
   return updatedMerchant;

@@ -3,6 +3,6 @@ const variationController = require('../controllers/variatonController');
 const router = express.Router();
 
 router.post('/add', variationController.addVariation);
-router.get('/', variationController.getVariations);
+router.get('/data', variationController.getVariations);
 
 module.exports = router;
