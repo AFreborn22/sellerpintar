@@ -65,7 +65,7 @@ The server will start on `http://localhost:3000`.
 
 ## Folder Structure
 
-
+```
 src
 ├── controllers          # Contains controller files for handling requests
 ├── routes               # Contains route files for defining API endpoints
@@ -73,3 +73,4 @@ src
 ├── prisma               # Contains Prisma schema and migrations
 ├── swagger              # Contains Swagger documentation
 ├── app.js               # Entry point of the application
+```
