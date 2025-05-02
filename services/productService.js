@@ -1,21 +1,22 @@
-const prisma = require('../generated/prisma');
+const { PrismaClient } = require('../generated/prisma');
+const prisma = new PrismaClient();
 
 exports.addProduct = async (data) => {
-  const { name, id, variations } = data;
+  const { name, merchant_id, price, description, variations } = data;
   const product = await prisma.product.create({
     data: {
       name,
-      id,
+      price,
+      merchant: {
+        connect: { id: merchant_id }, 
+      },
+      description,
       variations: {
         create: variations.map((variation) => ({
           color: variation.color,
           size: variation.size,
-          stock: {
-            create: variation.stocks.map((stock) => ({
-              quantity: stock.quantity,
-              sku: stock.sku,
-            })),
-          },
+          sku: variation.sku,
+          stock_count: variation.stock_count, 
         })),
       },
     },
@@ -26,30 +27,41 @@ exports.addProduct = async (data) => {
 exports.getAllProducts = async () => {
   return await prisma.product.findMany({
     include: {
-      variations: {
-        include: {
-          stock: true,
-        },
-      },
+      variations: true
     },
   });
 };
 
 exports.updateProduct = async (id, data) => {
-  const { name, variations } = data;
+  const { name, variations, price, description } = data;
+
+  const product = await prisma.product.findUnique({
+    where: { id: parseInt(id, 10) },
+  });
+
+  if (!product) {
+    throw new Error('Product not found');
+  }
+
   return await prisma.product.update({
-    where: { id },
+    where: { id: parseInt(id, 10) },
     data: {
       name,
+      price,
+      description,
       variations: {
-        create: variations.map((variation) => ({
-          color: variation.color,
-          size: variation.size,
-          stock: {
-            create: variation.stocks.map((stock) => ({
-              quantity: stock.quantity,
-              sku: stock.sku,
-            })),
+        upsert: variations.map((variation) => ({
+          where: { sku: variation.sku }, 
+          update: {
+            color: variation.color,
+            size: variation.size,
+            stock_count: variation.stock_count,
+          },
+          create: {
+            color: variation.color,
+            size: variation.size,
+            sku: variation.sku,
+            stock_count: variation.stock_count, 
           },
         })),
       },
@@ -59,27 +71,29 @@ exports.updateProduct = async (id, data) => {
 
 exports.getProductById = async (id) => {
   return await prisma.product.findUnique({
-    where: { id },
+    where: { id: parseInt(id, 10) },
     include: {
-      variations: {
-        include: {
-          stock: true,
-        },
-      },
+      variations: true
     },
   });
 };
 
 exports.deleteProduct = async (id) => {
-  const merchant = await prisma.merchant.findUnique({
-    where: { id: id },
+  const productId = parseInt(id, 10);
+
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
   });
 
-  if (!merchant) {
-    throw new Error('Merchant not found');
+  if (!product) {
+    throw new Error('Product not found');
   }
 
-  await prisma.merchant.delete({
-    where: { id: id },
+  await prisma.variation.deleteMany({
+    where: { product_id: productId },
+  });
+
+  await prisma.product.delete({
+    where: { id: productId },
   });
 };

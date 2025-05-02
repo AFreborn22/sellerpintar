@@ -2,7 +2,11 @@ const MerchantService = require('../services/merchantService');
 
 exports.createMerchant = async (req, res) => {
   try {
-    const merchant = await MerchantService.registerMerchant(req.body);
+    const userId = req.user.id; 
+    const { name } = req.body;
+
+    const merchant = await MerchantService.registerMerchant(userId, { name });
+
     res.status(201).json(merchant);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -27,10 +31,10 @@ exports.updateMerchant = async (req, res) => {
     }
 };
   
-  exports.deleteMerchant = async (req, res) => {
+exports.deleteMerchant = async (req, res) => {
     try {
       await MerchantService.deleteMerchant(req.params.id);
-      res.status(204).send(); 
+      res.status(200).json({message :"Merchant deleted successfully"}); 
     } catch (error) {
       res.status(400).json({ message: error.message });
     }

@@ -1,10 +1,14 @@
-const prisma = require('../generated/prisma');
+const { PrismaClient } = require('../generated/prisma');
+const prisma = new PrismaClient();
 
-exports.registerMerchant = async (data) => {
+exports.registerMerchant = async (userId, data) => {
   const { name } = data;
   const merchant = await prisma.merchant.create({
     data: {
       name,
+      user: {
+        connect: { id: userId }, 
+      },
     },
   });
   return merchant;
@@ -12,14 +16,18 @@ exports.registerMerchant = async (data) => {
 
 exports.getMerchantProducts = async (id) => {
   const products = await prisma.product.findMany({
-    where: { id },
+    where: { 
+      id: parseInt(id, 10),
+     },
   });
   return products;
 };
 
 exports.updateMerchant = async (id, data) => {
   const merchant = await prisma.merchant.findUnique({
-    where: { id: id },
+    where: { 
+      id: parseInt(id, 10),
+     },
   });
 
   if (!merchant) {
@@ -27,7 +35,7 @@ exports.updateMerchant = async (id, data) => {
   }
 
   const updatedMerchant = await prisma.merchant.update({
-    where: { id: id },
+    where: { id: parseInt(id, 10), },
     data : {
       name : data.name,
     },
@@ -38,7 +46,7 @@ exports.updateMerchant = async (id, data) => {
 
 exports.deleteMerchant = async (id) => {
   const merchant = await prisma.merchant.findUnique({
-    where: { id: id },
+    where: { id: parseInt(id, 10), },
   });
 
   if (!merchant) {
@@ -46,7 +54,7 @@ exports.deleteMerchant = async (id) => {
   }
 
   await prisma.merchant.delete({
-    where: { id: id },
+    where: { id: parseInt(id, 10), },
   });
 };
 

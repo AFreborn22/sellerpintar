@@ -1,16 +1,17 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const prisma = require('../generated/prisma');
+const { PrismaClient } = require('../generated/prisma');
+const prisma = new PrismaClient();
 require('dotenv').config();
 
 exports.register = async (data) => {
-  const { username, email, password} = data;
+  const { name, email, password} = data;
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await prisma.user.create({
+  const user = await prisma.User.create({
     data: {
-      username,
+      name,
       email,
       password: hashedPassword,
     },
@@ -21,7 +22,7 @@ exports.register = async (data) => {
 
 exports.login = async (data) => {
   const { email, password } = data;
-  const user = await prisma.user.findUnique({
+  const user = await prisma.User.findUnique({
     where: { email },
   });
 
@@ -32,5 +33,5 @@ exports.login = async (data) => {
   if (!isMatch) throw new Error('Invalid credentials');
 
   const token = jwt.sign({ id: user.id, email: user.email }, process.env.SECRETKEY, { expiresIn: '30m' });
-  return token;
+  return { user, token };
 };

@@ -1,4 +1,5 @@
-const prisma = require('../generated/prisma');
+const { PrismaClient } = require('../generated/prisma');
+const prisma = new PrismaClient();
 
 exports.addVariation = async (data) => {
   const { color, size, id, stocks } = data;

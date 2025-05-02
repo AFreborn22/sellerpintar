@@ -18,6 +18,15 @@ exports.getProducts = async (req, res) => {
   }
 };
 
+exports.getProductById = async (req, res) => {
+  try {
+    const products = await ProductService.getProductById(req.params.id);
+    res.status(200).json(products);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 exports.updateProduct = async (req, res) => {
   try {
     const updatedProduct = await ProductService.updateProduct(req.params.id, req.body);
@@ -30,7 +39,7 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     await ProductService.deleteProduct(req.params.id);
-    res.status(204).send(); 
+    res.status(200).json({ message: "Product deleted successfully" }); 
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

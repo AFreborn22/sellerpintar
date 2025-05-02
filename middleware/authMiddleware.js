@@ -13,9 +13,9 @@ exports.authenticateToken = async (req, res, next) => {
       token = token.slice(7, token.length);
     }
 
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    const decoded = jwt.verify(token, process.env.SECRETKEY);
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.User.findUnique({
       where: { id: decoded.id },
     });
 
