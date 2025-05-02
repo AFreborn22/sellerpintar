@@ -5,33 +5,50 @@ const prisma = new PrismaClient();
 require('dotenv').config();
 
 exports.register = async (data) => {
-  const { name, email, password} = data;
+  const { name, email, password } = data;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await prisma.User.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-    },
-  });
+    const user = await prisma.User.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+      },
+    });
 
-  return user;
+    return user;
+  } catch (error) {
+    if (error.code === 'P2002') {
+      throw new Error(`Email already in use`);
+    }
+    throw error;
+  }
 };
 
 exports.login = async (data) => {
   const { email, password } = data;
-  const user = await prisma.User.findUnique({
-    where: { email },
-  });
 
-  if (!user) throw new Error('Invalid credentials');
+  try {
+    const user = await prisma.User.findUnique({
+      where: { email },
+    });
 
-  const isMatch = await bcrypt.compare(password, user.password);
+    if (!user) throw new Error('Invalid credentials');
 
-  if (!isMatch) throw new Error('Invalid credentials');
+    const isMatch = await bcrypt.compare(password, user.password);
 
-  const token = jwt.sign({ id: user.id, email: user.email }, process.env.SECRETKEY, { expiresIn: '30m' });
-  return { user, token };
+    if (!isMatch) throw new Error('Invalid credentials');
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.SECRETKEY,
+      { expiresIn: '30m' }
+    );
+
+    return { user, token };
+  } catch (error) {
+    throw error;
+  }
 };

@@ -3,58 +3,82 @@ const prisma = new PrismaClient();
 
 exports.registerMerchant = async (userId, data) => {
   const { name } = data;
-  const merchant = await prisma.merchant.create({
-    data: {
-      name,
-      user: {
-        connect: { id: userId }, 
+
+  try {
+    const merchant = await prisma.merchant.create({
+      data: {
+        name,
+        user: {
+          connect: { id: userId },
+        },
       },
-    },
-  });
-  return merchant;
+    });
+    return merchant;
+  } catch (error) {
+    if (error.code === 'P2002') {
+      throw new Error(`Unique constraint failed on field: ${error.meta.target}`);
+    }
+    throw error;
+  }
 };
 
 exports.getMerchantProducts = async (id) => {
-  const products = await prisma.product.findMany({
-    where: { 
-      id: parseInt(id, 10),
-     },
-  });
-  return products;
+  try {
+    const products = await prisma.product.findMany({
+      where: { merchant_id: parseInt(id, 10) }, 
+    });
+
+    if (!products || products.length === 0) {
+      throw new Error('No products found for this merchant');
+    }
+
+    return products;
+  } catch (error) {
+    throw error;
+  }
 };
 
 exports.updateMerchant = async (id, data) => {
-  const merchant = await prisma.merchant.findUnique({
-    where: { 
-      id: parseInt(id, 10),
-     },
-  });
+  try {
+    const merchant = await prisma.merchant.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
 
-  if (!merchant) {
-    throw new Error('Merchant not found');
+    if (!merchant) {
+      throw new Error('Merchant not found');
+    }
+
+    const updatedMerchant = await prisma.merchant.update({
+      where: { id: parseInt(id, 10) },
+      data: {
+        name: data.name,
+      },
+    });
+
+    return updatedMerchant;
+  } catch (error) {
+    if (error.code === 'P2002') {
+      throw new Error(`Unique constraint failed on field: ${error.meta.target}`);
+    }
+    throw error;
   }
-
-  const updatedMerchant = await prisma.merchant.update({
-    where: { id: parseInt(id, 10), },
-    data : {
-      name : data.name,
-    },
-  });
-
-  return updatedMerchant;
 };
 
 exports.deleteMerchant = async (id) => {
-  const merchant = await prisma.merchant.findUnique({
-    where: { id: parseInt(id, 10), },
-  });
+  try {
+    const merchant = await prisma.merchant.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
 
-  if (!merchant) {
-    throw new Error('Merchant not found');
+    if (!merchant) {
+      throw new Error('Merchant not found');
+    }
+
+    await prisma.merchant.delete({
+      where: { id: parseInt(id, 10) },
+    });
+  } catch (error) {
+    throw error;
   }
-
-  await prisma.merchant.delete({
-    where: { id: parseInt(id, 10), },
-  });
 };
 

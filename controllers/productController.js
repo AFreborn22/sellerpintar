@@ -5,7 +5,11 @@ exports.addProduct = async (req, res) => {
     const product = await ProductService.addProduct(req.body);
     res.status(201).json(product);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    if (error.message.includes('Unique constraint failed')) {
+      res.status(409).json({ message: error.message }); 
+    } else {
+      res.status(400).json({ message: error.message });
+    }
   }
 };
 
@@ -32,15 +36,25 @@ exports.updateProduct = async (req, res) => {
     const updatedProduct = await ProductService.updateProduct(req.params.id, req.body);
     res.status(200).json(updatedProduct);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    if (error.message.includes('Unique constraint failed')) {
+      res.status(409).json({ message: error.message }); 
+    } else if (error.message === 'Product not found') {
+      res.status(404).json({ message: error.message }); 
+    } else {
+      res.status(400).json({ message: error.message });
+    }
   }
-}
+};
 
 exports.deleteProduct = async (req, res) => {
   try {
     await ProductService.deleteProduct(req.params.id);
-    res.status(200).json({ message: "Product deleted successfully" }); 
+    res.status(200).json({ message: 'Product deleted successfully' });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    if (error.message === 'Product not found') {
+      res.status(404).json({ message: error.message }); 
+    } else {
+      res.status(400).json({ message: error.message });
+    }
   }
-}
+};
